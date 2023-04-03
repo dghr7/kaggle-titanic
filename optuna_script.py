@@ -2,7 +2,7 @@ import pandas as pd
 import colorama
 
 from sklearn.model_selection import cross_val_score
-from sklearn.ensemble import GradientBoostingClassifier
+import xgboost as xgb
 
 import optuna
 from optuna.samplers import TPESampler
@@ -16,18 +16,20 @@ scorer = 'balanced_accuracy'
 def objective(trial, X_train, y_train):
 
     params = {
-        'loss': trial.suggest_categorical('loss', ['deviance', 'exponential']),
-        'learning_rate': trial.suggest_loguniform('learning_rate', 0.001, 1),
-        'n_estimators': trial.suggest_int('n_estimators', 50, 500),
+        'n_estimators': trial.suggest_int('n_estimators', 50, 1000, 50),
         'max_depth': trial.suggest_int('max_depth', 2, 10),
-        'min_samples_split': trial.suggest_int('min_samples_split', 2, 10),
-        'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 4),
-        'max_features': trial.suggest_categorical('max_features', ['sqrt', 'log2', None])
+        'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.8, log=True),
+        # 'gamma': trial.suggest_float('gamma', 0, 5),
+        'subsample': trial.suggest_float('subsample', 0.1, 1.0, step=0.05),
+        'min_child_weight': trial.suggest_float('min_child_weight', 1, 50),
+        'colsample_bytree': trial.suggest_float('colsample_bytree', 0.1, 1.0, step=0.05),
+        'reg_alpha': trial.suggest_float('reg_alpha', 0.1, 5, log=True),
+        'reg_lambda': trial.suggest_float('reg_lambda', 0.1, 5, log=True),
     }
     
     # V1 : cv using cross_val_score
-    clf = GradientBoostingClassifier(**params, 
-                                     random_state=RANDOM_STATE)
+    clf = xgb.XGBClassifier(**params, 
+                            random_state=RANDOM_STATE)
 
     score = cross_val_score(clf, X_train, y_train,  cv=6, scoring=scorer).mean()
 
