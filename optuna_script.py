@@ -13,7 +13,7 @@ from optuna.pruners import MedianPruner, HyperbandPruner
 RANDOM_STATE = 42
 scorer = 'balanced_accuracy'
 
-def objective(trial, X_train, y_train):
+def objective(trial, X, y):
 
     params = {
         'n_estimators': trial.suggest_int('n_estimators', 50, 1000, 50),
@@ -31,19 +31,17 @@ def objective(trial, X_train, y_train):
     clf = xgb.XGBClassifier(**params, 
                             random_state=RANDOM_STATE)
 
-    score = cross_val_score(clf, X_train, y_train,  cv=6, scoring=scorer).mean()
+    score = cross_val_score(clf, X, y,  cv=6, scoring=scorer).mean()
 
     return score
 
 if __name__ == "__main__":
 
     print("Importing data")
-    X_train = pd.read_pickle("./DATA/X_train.pkl")
-    y_train = pd.read_pickle("./DATA/y_train.pkl")
-    X_test = pd.read_pickle("./DATA/X_test.pkl")
-    y_test = pd.read_pickle("./DATA/y_test.pkl")
+    X = pd.read_pickle("./DATA/X.pkl")
+    y = pd.read_pickle("./DATA/y.pkl")
 
-    print(f"X_train shape : {X_train.shape} / X_test shape : {X_test.shape}")
+    print(f"X_train shape : {X.shape} / X_test shape : {y.shape}")
 
     print("Initializing study")
     study = optuna.create_study(study_name = 'gb', 
@@ -54,7 +52,7 @@ if __name__ == "__main__":
 
     optuna.logging.set_verbosity(optuna.logging.WARNING)
 
-    func = lambda trial: objective(trial, X_train, y_train)
+    func = lambda trial: objective(trial, X, y)
 
     print("Optimization")
     study.optimize(func, n_trials = 100)
