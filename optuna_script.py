@@ -31,7 +31,7 @@ def objective(trial, X, y):
     clf = xgb.XGBClassifier(**params, 
                             random_state=RANDOM_STATE)
 
-    score = cross_val_score(clf, X, y,  cv=6, scoring=scorer).mean()
+    score = cross_val_score(clf, X, y,  cv=5, scoring=scorer).mean()
 
     return score
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     print(f"X_train shape : {X.shape} / X_test shape : {y.shape}")
 
     print("Initializing study")
-    study = optuna.create_study(study_name = 'gb', 
+    study = optuna.create_study(study_name = 'xgb', 
                                 direction = "maximize", 
                                 sampler = TPESampler(seed=RANDOM_STATE),
                                 pruner = HyperbandPruner()
