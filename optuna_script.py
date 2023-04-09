@@ -6,8 +6,7 @@ import xgboost as xgb
 
 import optuna
 from optuna.samplers import TPESampler
-from optuna.pruners import MedianPruner, HyperbandPruner
-
+from optuna.pruners import HyperbandPruner
 
 
 RANDOM_STATE = 42
